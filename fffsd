@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Counter DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script> 
+</head>
+<body>
+    <h1>Simple Counter DApp</h1>
+    <button id="incrementBtn">Increment</button>
+    <p>Current Count: <span id="count">0</span></p>
+
+    <script>
+        // Check if an Ethereum wallet plugin (like MetaMask) is installed
+        if (window.ethereum) {
+            window.web3 = new Web3(ethereum);
+            console.log('MetaMask is installed!');
+        } else {
+            console.log('Please install MetaMask!');
+        }
+
+        // Load contract ABI and address
+        const abi = [/* Your contract ABI */];
+        const address = 'Your contract address';
+
+        // Connect to the user's wallet and instantiate the contract object
+        async function connectWallet() {
+            try {
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                const contract = new web3.eth.Contract(abi, address);
+                console.log('Connected with account:', accounts[0]);
+                return { contract, accounts };
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+            }
+        }
+
+        // Call the contract's increment function
+        async function increment() {
+            const { contract, accounts } = await connectWallet();
+            try {
+                await contract.methods.increment().send({ from: accounts[0] });
+            } catch (error) {
+                console.error('Error incrementing count:', error);
+            }
+        }
+
+        // Get the current count from the contract
+        async function getCount() {
+            const { contract } = await connectWallet();
+            try {
+                const count = await contract.methods.getCount().call();
+                document.getElementById('count').innerText = count;
+            } catch (error) {
+                console.error('Error getting count:', error);
+            }
+        }
+
+        // Bind the button event
+        document.getElementById('incrementBtn').addEventListener('click', increment);
+        getCount(); // Load the initial count
+    </script>
+</body>
+</html>
